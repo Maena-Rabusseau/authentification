@@ -32,6 +32,22 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22023
           source: "dist/*"
-          target: "/var/www/authentification/pb_public"
+          target: "/var/www/r312/"
           strip_components: 1
-          rm: true
+          rm: false
+          overwrite: true
+          debug: true
+
+      - name: Install production dependencies on VPS
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22023
+          script: |
+            cd /var/www/r312/server
+            npm ci
+            npm install astro
+            npm install send server-destroy
+            PORT=8082 pm2 restart r312 || PORT=8082 pm2 start entry.mjs --name r312
